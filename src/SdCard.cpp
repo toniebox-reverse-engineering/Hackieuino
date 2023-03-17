@@ -7,7 +7,7 @@
 #include "MemX.h"
 #include "System.h"
 
-#ifdef SD_MMC_1BIT_MODE
+#ifdef SD_MMC_1BIT_MODE || SD_MMC_4BIT_MODE
 	fs::FS gFSystem = (fs::FS)SD_MMC;
 #else
 	SPIClass spiSD(HSPI);
@@ -15,11 +15,34 @@
 #endif
 
 void SdCard_Init(void) {
+	#ifdef SD_MMC_CUSTOM_PINS
+		#ifdef SD_MMC_1BIT_MODE
+		SD_MMC.setPins(
+			SD_MMC_CUSTOM_CLK,
+			SD_MMC_CUSTOM_CMD,
+			SD_MMC_CUSTOM_DAT0
+		);
+		#endif
+		#ifdef SD_MMC_4BIT_MODE
+		SD_MMC.setPins(
+			SD_MMC_CUSTOM_CLK,
+			SD_MMC_CUSTOM_CMD,
+			SD_MMC_CUSTOM_DAT0,
+			SD_MMC_CUSTOM_DAT1,
+			SD_MMC_CUSTOM_DAT2,
+			SD_MMC_CUSTOM_DAT3,
+		);
+		#endif
+	#endif
 	#ifndef SINGLE_SPI_ENABLE
 		#ifdef SD_MMC_1BIT_MODE
 			pinMode(2, INPUT_PULLUP);
 			while (!SD_MMC.begin("/sdcard", true)) {
-		#else
+		#endif
+		#ifdef SD_MMC_4BIT_MODE
+			while (!SD_MMC.begin("/sdcard")) {
+		#endif
+		#ifndef SD_MMC_1BIT_MODE && SD_MMC_4BIT_MODE
 			pinMode(SPISD_CS, OUTPUT);
 			digitalWrite(SPISD_CS, HIGH);
 			spiSD.begin(SPISD_SCK, SPISD_MISO, SPISD_MOSI, SPISD_CS);
@@ -30,7 +53,11 @@ void SdCard_Init(void) {
 		#ifdef SD_MMC_1BIT_MODE
 			pinMode(2, INPUT_PULLUP);
 			while (!SD_MMC.begin("/sdcard", true)) {
-		#else
+		#endif
+		#ifdef SD_MMC_4BIT_MODE
+			while (!SD_MMC.begin("/sdcard")) {
+		#endif
+		#ifndef SD_MMC_1BIT_MODE && SD_MMC_4BIT_MODE
 			while (!SD.begin(SPISD_CS)) {
 		#endif
 	#endif
@@ -47,14 +74,14 @@ void SdCard_Init(void) {
 
 void SdCard_Exit(void) {
 	// SD card goto idle mode
-	#ifdef SD_MMC_1BIT_MODE
+	#ifdef SD_MMC_1BIT_MODE || SD_MMC_4BIT_MODE
 		SD_MMC.end();
 	#endif
 }
 
 sdcard_type_t SdCard_GetType(void) {
 	sdcard_type_t cardType;
-	#ifdef SD_MMC_1BIT_MODE
+	#ifdef SD_MMC_1BIT_MODE || SD_MMC_4BIT_MODE
 		Log_Println(sdMountedMmc1BitMode, LOGLEVEL_NOTICE);
 		cardType = SD_MMC.cardType();
 	#else
@@ -65,7 +92,7 @@ sdcard_type_t SdCard_GetType(void) {
 }
 
 uint64_t SdCard_GetSize() {
-	#ifdef SD_MMC_1BIT_MODE
+	#ifdef SD_MMC_1BIT_MODE || SD_MMC_4BIT_MODE
 		return SD_MMC.cardSize();
 	#else
 		return SD.cardSize();
@@ -73,7 +100,7 @@ uint64_t SdCard_GetSize() {
 }
 
 uint64_t SdCard_GetFreeSize() {
-	#ifdef SD_MMC_1BIT_MODE
+	#ifdef SD_MMC_1BIT_MODE || SD_MMC_4BIT_MODE
 		return SD_MMC.cardSize() - SD_MMC.usedBytes();
 	#else
 		return SD.cardSize() - SD.usedBytes();
