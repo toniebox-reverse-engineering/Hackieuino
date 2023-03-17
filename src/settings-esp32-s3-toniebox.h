@@ -117,27 +117,33 @@
         Please have a look at values.h to look up actions available (>=100 can be used)
         If you don't want to assign an action or you don't use a given button: CMD_NOTHING has to be set
     */
+    #define NEXT_BUTTON                     20          // Button 0: GPIO to detect next
+    #define PREVIOUS_BUTTON                 21          // Button 1: GPIO to detect previous (Important: as of 19.11.2020 changed from 33 to 2; make sure to change in SD-MMC-mode)
+    #define PAUSEPLAY_BUTTON                99          // Button 2: GPIO to detect pause/play
+    #define ROTARYENCODER_BUTTON            99          // (set to 99 to disable; 0->39 for GPIO; 100->115 for port-expander)
+    #define BUTTON_4                        99          // Button 4: unnamed optional button
+    #define BUTTON_5                        99          // Button 5: unnamed optional button
     // *****BUTTON*****        *****ACTION*****
-    #define BUTTON_0_SHORT    CMD_NEXTTRACK
-    #define BUTTON_1_SHORT    CMD_PREVTRACK
-    #define BUTTON_2_SHORT    CMD_PLAYPAUSE
-    #define BUTTON_3_SHORT    CMD_MEASUREBATTERY
-    #define BUTTON_4_SHORT    CMD_SEEK_BACKWARDS
-    #define BUTTON_5_SHORT    CMD_SEEK_FORWARDS
+    #define BUTTON_0_SHORT    CMD_VOLUMEDOWN
+    #define BUTTON_1_SHORT    CMD_VOLUMEUP
+    #define BUTTON_2_SHORT    CMD_NOTHING
+    #define BUTTON_3_SHORT    CMD_NOTHING
+    #define BUTTON_4_SHORT    CMD_NOTHING
+    #define BUTTON_5_SHORT    CMD_NOTHING
 
-    #define BUTTON_0_LONG     CMD_LASTTRACK
-    #define BUTTON_1_LONG     CMD_FIRSTTRACK
-    #define BUTTON_2_LONG     CMD_PLAYPAUSE
-    #define BUTTON_3_LONG     CMD_SLEEPMODE
+    #define BUTTON_0_LONG     CMD_NOTHING
+    #define BUTTON_1_LONG     CMD_NOTHING
+    #define BUTTON_2_LONG     CMD_NOTHING
+    #define BUTTON_3_LONG     CMD_NOTHING
     #define BUTTON_4_LONG     CMD_NOTHING
     #define BUTTON_5_LONG     CMD_NOTHING
 
     #define BUTTON_MULTI_01   CMD_NOTHING   //CMD_TOGGLE_WIFI_STATUS (disabled now to prevent children from unwanted WiFi-disable)
-    #define BUTTON_MULTI_02   CMD_ENABLE_FTP_SERVER
+    #define BUTTON_MULTI_02   CMD_NOTHING
     #define BUTTON_MULTI_03   CMD_NOTHING
     #define BUTTON_MULTI_04   CMD_NOTHING
     #define BUTTON_MULTI_05   CMD_NOTHING
-    #define BUTTON_MULTI_12   CMD_TELL_IP_ADDRESS
+    #define BUTTON_MULTI_12   CMD_NOTHING
     #define BUTTON_MULTI_13   CMD_NOTHING
     #define BUTTON_MULTI_14   CMD_NOTHING
     #define BUTTON_MULTI_15   CMD_NOTHING
