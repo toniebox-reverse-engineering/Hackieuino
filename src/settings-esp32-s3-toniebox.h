@@ -58,6 +58,14 @@
     //################## select SD card mode #############################
     //#define SD_MMC_1BIT_MODE              // run SD card in SD-MMC 1Bit mode (using GPIOs 15 + 14 + 2 is mandatory!)
     //#define SINGLE_SPI_ENABLE             // If only one SPI-instance should be used instead of two (not yet working!)
+    #define SD_MMC_4BIT_MODE
+    #define SD_MMC_CUSTOM_PINS
+    #define SD_MMC_CUSTOM_CLK 35
+    #define SD_MMC_CUSTOM_CMD 38
+    #define SD_MMC_CUSTOM_DAT0 36
+    #define SD_MMC_CUSTOM_DAT1 37
+    #define SD_MMC_CUSTOM_DAT2 33
+    #define SD_MMC_CUSTOM_DAT3 34
     
     //################## select RFID reader ##############################
     //#define RFID_READER_TYPE_MFRC522_SPI    // use MFRC522 via SPI

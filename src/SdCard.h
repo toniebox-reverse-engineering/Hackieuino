@@ -1,6 +1,6 @@
 #pragma once
 #include "settings.h"
-#ifdef SD_MMC_1BIT_MODE
+#ifdef SD_MMC_1BIT_MODE || SD_MMC_4BIT_MODE
 	#include "SD_MMC.h"
 #else
 	#include "SD.h"
