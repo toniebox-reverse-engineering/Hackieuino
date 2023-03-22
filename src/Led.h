@@ -33,6 +33,9 @@ enum class LedAnimationType
 	NoNewAnimation
 };
 
+void LedLib_Show(void);
+void LedLib_Clear(bool writeData = false);
+void LedLib_SetBrightness(uint8_t brightness);
 void Led_Init(void);
 void Led_Exit(void);
 void Led_Indicate(LedIndicatorType value);
