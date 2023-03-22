@@ -12,7 +12,11 @@
 #include "Bluetooth.h"
 #include "Port.h"
 
-#ifdef NEOPIXEL_ENABLE
+#ifdef RGB_LED_ENABLE
+	#include <RGBLed.h>
+	RGBLed rgbled(LED_R_PIN, LED_G_PIN, LED_B_PIN, RGBLed::COMMON_CATHODE);
+#endif
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	#include <FastLED.h>
 
 	#define LED_INITIAL_BRIGHTNESS 16u
@@ -52,6 +56,28 @@
 	static void Led_Task(void *parameter);
 	static uint8_t Led_Address(uint8_t number);
 
+	void LedLib_Show(void) {
+		#ifdef NEOPIXEL_ENABLE
+			FastLED.show();
+		#elif defined(RGB_LED_ENABLE)
+			rgbled.setColor(leds[0].red, leds[0].green, leds[0].blue);
+		#endif
+	}
+	void LedLib_Clear(bool writeData) {
+		#ifdef NEOPIXEL_ENABLE
+			FastLED.clear(writeData);
+		#elif defined(RGB_LED_ENABLE)
+			rgbled.off();
+		#endif
+	}
+	void LedLib_SetBrightness(uint8_t brightness) {
+		#ifdef NEOPIXEL_ENABLE
+			FastLED.setBrightness(Led_Brightness);
+		#elif defined(RGB_LED_ENABLE)
+			rgbled.brightness(brightness);
+		#endif
+	}
+
 	// animation-functions prototypes
 	AnimationReturnType Animation_PlaylistProgress(const bool startNewAnimation, CRGBSet &leds);
 	AnimationReturnType Animation_BatteryMeasurement(const bool startNewAnimation, CRGBSet &leds);
@@ -71,7 +97,7 @@
 #endif
 
 void Led_Init(void) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		// Get some stuff from NVS...
 		// Get initial LED-brightness from NVS
 		uint8_t nvsILedBrightness = gPrefsSettings.getUChar("iLedBrightness", 0);
@@ -107,26 +133,26 @@ void Led_Init(void) {
 }
 
 void Led_Exit(void) {
-	#ifdef NEOPIXEL_ENABLE
-		FastLED.clear(true);
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
+		LedLib_Clear(true);
 	#endif
 }
 
 void Led_Indicate(LedIndicatorType value) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		LED_INDICATOR_SET(value);
 	#endif
 }
 
 void Led_SetPause(boolean value) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		Led_Pause = value;
 	#endif
 }
 
 // Used to reset brightness to initial value after prevously active sleepmode was left
 void Led_ResetToInitialBrightness(void) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		if (Led_Brightness == Led_NightBrightness || Led_Brightness == 0) {	// Only reset to initial value if brightness wasn't intentionally changed (or was zero)
 			Led_Brightness = Led_InitialBrightness;
 			Log_Println(ledsDimmedToInitialValue, LOGLEVEL_INFO);
@@ -138,7 +164,7 @@ void Led_ResetToInitialBrightness(void) {
 }
 
 void Led_ResetToNightBrightness(void) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		Led_Brightness = Led_NightBrightness;
 		Log_Println(ledsDimmedToNightmode, LOGLEVEL_INFO);
 	#endif
@@ -148,7 +174,7 @@ void Led_ResetToNightBrightness(void) {
 }
 
 uint8_t Led_GetBrightness(void) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		return Led_Brightness;
 	#else
 		return 0u;
@@ -156,7 +182,7 @@ uint8_t Led_GetBrightness(void) {
 }
 
 void Led_SetBrightness(uint8_t value) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		Led_Brightness = value;
 		#ifdef BUTTONS_LED
 			Port_Write(BUTTONS_LED, value <= Led_NightBrightness ? LOW : HIGH, false);
@@ -165,7 +191,7 @@ void Led_SetBrightness(uint8_t value) {
 }
 
 // Calculates physical address for a virtual LED address. This handles reversing the rotation direction of the ring and shifting the starting LED
-#ifdef NEOPIXEL_ENABLE
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	uint8_t Led_Address(uint8_t number) {
 		#ifdef NEOPIXEL_REVERSE_ROTATION
 			#if LED_OFFSET > 0
@@ -183,7 +209,7 @@ void Led_SetBrightness(uint8_t value) {
 	}
 #endif
 
-#ifdef NEOPIXEL_ENABLE
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	void Led_DrawControls() {
 		#if NUM_CONTROL_LEDS > 0
 			static CRGB::HTMLColorCode controlLedColors[NUM_CONTROL_LEDS] = CONTROL_LEDS_COLORS;
@@ -201,7 +227,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 }
 
 
-#ifdef NEOPIXEL_ENABLE
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	CRGB Led_DimColor(CRGB color, uint8_t brightness) {
 		const uint8_t factor = uint16_t(brightness * __UINT8_MAX__) / DIMMABLE_STATES;
 		return color.nscale8(factor);
@@ -243,13 +269,18 @@ void Led_SetButtonLedsEnabled(boolean value) {
 	}
 #endif
 
-#ifdef NEOPIXEL_ENABLE
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	static void Led_Task(void *parameter) {
 		static bool turnedOffLeds = false;
 		static uint8_t lastLedBrightness = Led_Brightness;
-		FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, leds.size()).setCorrection(TypicalSMD5050);
-		FastLED.setBrightness(Led_Brightness);
-		FastLED.setDither(DISABLE_DITHER);
+		static CRGB::HTMLColorCode idleColor;
+		static CRGB::HTMLColorCode speechColor = CRGB::Yellow;
+
+		#ifdef NEOPIXEL_ENABLE
+			FastLED.addLeds<CHIPSET, LED_PIN, COLOR_ORDER>(leds, leds.size()).setCorrection(TypicalSMD5050);
+			FastLED.setDither(DISABLE_DITHER);
+		#endif
+		LedLib_SetBrightness(Led_Brightness);
 
 		LedAnimationType activeAnimation = LedAnimationType::NoNewAnimation;
 		LedAnimationType nextAnimation = LedAnimationType::NoNewAnimation;
@@ -264,7 +295,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 			}
 			if (System_IsSleepRequested()) { // If deepsleep is planned, turn off LEDs first in order to avoid LEDs still glowing when ESP32 is in deepsleep
 				if (!turnedOffLeds) {
-					FastLED.clear(true);
+					LedLib_Clear(true);
 					turnedOffLeds = true;
 				}
 				vTaskDelay(portTICK_RATE_MS * 10);
@@ -331,7 +362,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 
 			// apply brightness-changes
 			if (lastLedBrightness != Led_Brightness) {
-				FastLED.setBrightness(Led_Brightness);
+				LedLib_SetBrightness(Led_Brightness);
 				lastLedBrightness = Led_Brightness;
 			}
 
@@ -402,7 +433,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 
 					default:
 						indicator = CRGB::Black;
-						FastLED.show();
+						LedLib_Show();
 						ret.animationActive = false;
 						ret.animationDelay = 50;
 					break;
@@ -411,7 +442,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 				animationActive = ret.animationActive;
 				animationTimer = ret.animationDelay;
 				if(ret.animationRefresh) {
-					FastLED.show();
+					LedLib_Show();
 				}
 			}
 
@@ -426,7 +457,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 	}
 #endif
 
-#ifdef NEOPIXEL_ENABLE
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	// ---------------------------------------------------------------------
 	// ---------------        ANIMATION-METHODS        ---------------------
 	// ---------------------------------------------------------------------
@@ -1109,14 +1140,14 @@ void Led_SetButtonLedsEnabled(boolean value) {
 #endif
 
 void Led_TaskPause(void) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		vTaskSuspend(Led_TaskHandle);
-		FastLED.clear(true);
+		LedLib_Clear(true);
 	#endif
 }
 
 void Led_TaskResume(void) {
-	#ifdef NEOPIXEL_ENABLE
+	#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 		vTaskResume(Led_TaskHandle);
 	#endif
 }

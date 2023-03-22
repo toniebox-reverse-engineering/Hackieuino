@@ -56,6 +56,9 @@ struct AnimationReturnType {
 	AnimationReturnType(bool active, int32_t delay, bool refresh = false) :animationActive(active), animationDelay(delay), animationRefresh(refresh) {}
 };
 
+void LedLib_Show(void);
+void LedLib_Clear(bool writeData = false);
+void LedLib_SetBrightness(uint8_t brightness);
 void Led_Init(void);
 void Led_Exit(void);
 void Led_Indicate(LedIndicatorType value);
