@@ -99,22 +99,22 @@ void Button_Init() {
 
 	// Activate internal pullups for all enabled buttons connected to GPIOs
 	#ifdef BUTTON_0_ENABLE
-		pinMode(NEXT_BUTTON, INPUT_PULLUP);
+		pinMode(NEXT_BUTTON, BUTTON_INPUT);
 	#endif
 	#ifdef BUTTON_1_ENABLE
-		pinMode(PREVIOUS_BUTTON, INPUT_PULLUP);
+		pinMode(PREVIOUS_BUTTON, BUTTON_INPUT);
 	#endif
 	#ifdef BUTTON_2_ENABLE
-		pinMode(PAUSEPLAY_BUTTON, INPUT_PULLUP);
+		pinMode(PAUSEPLAY_BUTTON, BUTTON_INPUT);
 	#endif
 	#ifdef BUTTON_3_ENABLE
-		pinMode(ROTARYENCODER_BUTTON, INPUT_PULLUP);
+		pinMode(ROTARYENCODER_BUTTON, BUTTON_INPUT);
 	#endif
 	#ifdef BUTTON_4_ENABLE
-		pinMode(BUTTON_4, INPUT_PULLUP);
+		pinMode(BUTTON_4, BUTTON_INPUT);
 	#endif
 	#ifdef BUTTON_5_ENABLE
-		pinMode(BUTTON_5, INPUT_PULLUP);
+		pinMode(BUTTON_5, BUTTON_INPUT);
 	#endif
 
 	// Create 1000Hz-HW-Timer (currently only used for buttons)
