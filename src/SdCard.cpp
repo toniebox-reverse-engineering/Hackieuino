@@ -82,7 +82,11 @@ void SdCard_Exit(void) {
 sdcard_type_t SdCard_GetType(void) {
 	sdcard_type_t cardType;
 	#if defined(SD_MMC_1BIT_MODE) || defined(SD_MMC_4BIT_MODE)
-		Log_Println(sdMountedMmc1BitMode, LOGLEVEL_NOTICE);
+		#if defined(SD_MMC_1BIT_MODE)
+			Log_Println(sdMountedMmc1BitMode, LOGLEVEL_NOTICE);
+		#else
+			Log_Println(sdMountedMmc4BitMode, LOGLEVEL_NOTICE);
+		#endif
 		cardType = SD_MMC.cardType();
 	#else
 		Log_Println(sdMountedSpiMode, LOGLEVEL_NOTICE);
