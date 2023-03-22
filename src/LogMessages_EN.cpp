@@ -180,7 +180,8 @@
 	const char listingDirectory[] PROGMEM = "Listing directory";
 	const char failedToOpenDirectory[] PROGMEM = "Failed to open directory";
 	const char notADirectory[] PROGMEM = "Not a directory";
-	const char sdMountedMmc1BitMode[] PROGMEM = "SD card mounted in SPI-mode configured...";
+	const char sdMountedMmc1BitMode[] PROGMEM = "SD card mounting over SD_MMC(1 Bit)...";
+	const char sdMountedMmc4BitMode[] PROGMEM = "SD card mounting over SD_MMC(4 Bit)...";
 	const char sdMountedSpiMode[] PROGMEM = "Mounting SD card in SPI-mode...";
 	const char backupRecoveryWebsite[] PROGMEM = "<p>Backup-file is being applied...<br />Back to <a href=\"javascript:history.back()\">last page</a>.</p>";
 	const char restartWebsite[] PROGMEM = "<p>ESPuino is being restarted...<br />Back to <a href=\"javascript:history.back()\">last page</a>.</p>";

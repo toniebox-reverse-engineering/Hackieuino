@@ -180,7 +180,8 @@
 	const char listingDirectory[] PROGMEM = "Verzeichnisinhalt anzeigen";
 	const char failedToOpenDirectory[] PROGMEM = "Öffnen des Verzeichnisses fehlgeschlagen";
 	const char notADirectory[] PROGMEM = "Kein Verzeichnis";
-	const char sdMountedMmc1BitMode[] PROGMEM = "Versuche SD-Karte wird im SD_MMC-Modus (1 Bit) zu mounten...";
+	const char sdMountedMmc1BitMode[] PROGMEM = "Versuche SD-Karte im SD_MMC-Modus (1 Bit) zu mounten...";
+	const char sdMountedMmc4BitMode[] PROGMEM = "Versuche SD-Karte im SD_MMC-Modus (4 Bit) zu mounten...";
 	const char sdMountedSpiMode[] PROGMEM = "Versuche SD-Karte wird im SPI-Modus zu mounten...";
 	const char backupRecoveryWebsite[] PROGMEM = "<p>Das Backup-File wird eingespielt...<br />Zur letzten Seite <a href=\"javascript:history.back()\">zur&uuml;ckkehren</a>.</p>";
 	const char restartWebsite[] PROGMEM = "<p>Der ESPuino wird neu gestartet...<br />Zur letzten Seite <a href=\"javascript:history.back()\">zur&uuml;ckkehren</a>.</p>";

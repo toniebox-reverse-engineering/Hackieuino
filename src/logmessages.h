@@ -177,6 +177,7 @@ extern const char listingDirectory[];
 extern const char failedToOpenDirectory[];
 extern const char notADirectory[];
 extern const char sdMountedMmc1BitMode[];
+extern const char sdMountedMmc4BitMode[];
 extern const char sdMountedSpiMode[];
 extern const char backupRecoveryWebsite[];
 extern const char restartWebsite[];
