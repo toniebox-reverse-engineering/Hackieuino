@@ -18,7 +18,7 @@ char gCurrentRfidTagId[cardIdStringSize] = ""; // No crap here as otherwise it c
 #endif
 
 // check if we have RFID-reader enabled
-#if defined (RFID_READER_TYPE_MFRC522_SPI) || defined (RFID_READER_TYPE_MFRC522_I2C) || defined(RFID_READER_TYPE_PN5180)
+#if defined (RFID_READER_TYPE_MFRC522_SPI) || defined (RFID_READER_TYPE_MFRC522_I2C) || defined(RFID_READER_TYPE_PN5180) || defined (RFID_READER_TYPE_TRF7962A)
 	#define RFID_READER_ENABLED 1
 #endif
 
