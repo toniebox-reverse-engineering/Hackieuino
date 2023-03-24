@@ -14,4 +14,4 @@ platformio-override.ini
 src/settings-override.h
 src/settings-custom-override.h
 node_modules/
-lib/TRF7952A
+lib/RvX-TRF7962A
