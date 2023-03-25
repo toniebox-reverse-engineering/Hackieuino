@@ -10,12 +10,12 @@
 #include "HallEffectSensor.h"
 
 #if defined(RFID_READER_TYPE_TRF7962A)
-	#include <TRF7962A.h>
+	#include <RvX_TRF7962A.h>
 
 	extern unsigned long Rfid_LastRfidCheckTimestamp;
 	static void Rfid_Task(void *parameter);
 
-	static TRF7962A rfid = TRF7962A();
+	static RvX_TRF7962A rfid = RvX_TRF7962A();
 
 	void Rfid_Init(void) {
 		rfid.begin(1, 13);
@@ -47,7 +47,7 @@
 			Log_Println((char *) FPSTR(waitingForTaskQueues), LOGLEVEL_DEBUG);
 			vTaskDelay(50);
 		}
-		TRF7962A::TAG_EVENT tagEvent;
+		RvX_TRF7962A::TAG_EVENT tagEvent;
 		for (;;) {
 			vTaskDelay(portTICK_RATE_MS * 10u);
 			String cardIdString;
@@ -57,14 +57,14 @@
 			#endif
 			tagEvent = rfid.loop();
 
-			if (tagEvent == TRF7962A::TAG_EVENT::TAG_PLACED) {
+			if (tagEvent == RvX_TRF7962A::TAG_EVENT::TAG_PLACED) {
 				cardReceived = true;
 				rfid.getUID(uid);
 
 				#ifdef PAUSE_WHEN_RFID_REMOVED
 					cardAppliedCurrentRun = true;
 				#endif
-			} else if (tagEvent == TRF7962A::TAG_EVENT::TAG_REMOVED) {
+			} else if (tagEvent == RvX_TRF7962A::TAG_EVENT::TAG_REMOVED) {
 				#ifdef PAUSE_WHEN_RFID_REMOVED
 					cardAppliedCurrentRun = false;
 				#endif
