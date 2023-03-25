@@ -9,6 +9,7 @@
 #include "Button.h"
 #include "Cmd.h"
 #include "Common.h"
+#include "Dac.h"
 #include "Ftp.h"
 #include "IrReceiver.h"
 #include "Led.h"
@@ -210,6 +211,8 @@ void setup() {
 		Wlan_Cyclic();
 	}
 
+	Dac_Init();
+
 	IrReceiver_Init();
 	System_UpdateActivityTimer(); // initial set after boot
 	Led_Indicate(LedIndicatorType::BootComplete);
@@ -255,6 +258,7 @@ void loop() {
 		recoverLastRfidPlayedFromNvs();
 	#endif
 
+	Dac_Cyclic();
 	IrReceiver_Cyclic();
 	vTaskDelay(portTICK_RATE_MS * 5u);
 

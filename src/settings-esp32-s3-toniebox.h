@@ -30,6 +30,7 @@
     //########################## MODULES #################################
     //#define PORT_EXPANDER_ENABLE          // When enabled, buttons can be connected via port-expander PCA9555 (https://forum.espuino.de/t/einsatz-des-port-expanders-pca9555/306)
     //#define I2S_COMM_FMT_LSB_ENABLE       // Enables FMT instead of MSB for I2S-communication-format. Used e.g. by PT2811. Don't enable for MAX98357a, AC101 or PCM5102A)
+    #define DAC_TLV320DAC3100_ENABLE
     #define MDNS_ENABLE                     // When enabled, you don't have to handle with ESPuino's IP-address. If hostname is set to "ESPuino", you can reach it via ESPuino.local
     //#define MQTT_ENABLE                     // Make sure to configure mqtt-server and (optionally) username+pwd
     #define FTP_ENABLE                      // Enables FTP-server; DON'T FORGET TO ACTIVATE AFTER BOOT BY PRESSING PAUSE + NEXT-BUTTONS (IN PARALLEL)!
@@ -58,7 +59,7 @@
     //Board dependend cfg
     #define WAKEUP_BUTTON 7
 
-    // I2S (DAC) TODO
+    // I2S (DAC)
     #define I2S_DOUT                        10          // Digital out (I2S)
     #define I2S_BCLK                        11          // BCLK (I2S)
     #define I2S_LRC                         12          // LRC (I2S)
@@ -109,7 +110,6 @@
     #if defined(RFID_READER_TYPE_MFRC522_I2C) || defined(RFID_READER_TYPE_MFRC522_SPI)
         constexpr uint8_t rfidGain = 0x07 << 4;      // Sensitivity of RC522. For possible values see reference: https://forum.espuino.de/uploads/default/original/1X/9de5f8d35cbc123c1378cad1beceb3f51035cec0.png
     #endif
-
 
     //############# Port-expander-configuration ######################
     #ifdef PORT_EXPANDER_ENABLE
