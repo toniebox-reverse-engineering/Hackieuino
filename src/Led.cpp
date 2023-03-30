@@ -63,6 +63,7 @@
 		#ifdef NEOPIXEL_ENABLE
 			FastLED.clear(writeData);
 		#elif defined(RGB_LED_ENABLE)
+			leds[0].setRGB(0, 0, 0);
 			rgbled.off();
 		#endif
 	}
