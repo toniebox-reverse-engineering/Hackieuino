@@ -228,6 +228,30 @@ void System_DeepSleepManager(void) {
 		Led_Exit();
 		delay(200);
 
+		#ifdef WAKEUP_WAIT
+			Log_Println((char *) F("waiting for wakeup button to be released..."), LOGLEVEL_NOTICE);
+			pinMode(WAKEUP_BUTTON, BUTTON_INPUT);
+
+			#ifdef WAKEUP_ABORT1_BUTTON
+				pinMode(WAKEUP_ABORT1_BUTTON, BUTTON_INPUT);
+			#endif
+			#ifdef WAKEUP_ABORT2_BUTTON
+				pinMode(WAKEUP_ABORT2_BUTTON, BUTTON_INPUT);
+			#endif
+
+			while (!Port_Read(WAKEUP_BUTTON)) {
+				#ifdef WAKEUP_ABORT1_BUTTON
+					if(!Port_Read(WAKEUP_ABORT1_BUTTON))
+						esp_restart();
+				#endif
+				#ifdef WAKEUP_ABORT2_BUTTON
+					if(!Port_Read(WAKEUP_ABORT2_BUTTON))
+						esp_restart();
+				#endif
+				delay(10); //TODO Watchdog?
+			}
+		#endif
+
 		Button_Init_Wakeup();
 		Log_Println((char *) F("deep-sleep, good night......."), LOGLEVEL_NOTICE);
 		esp_deep_sleep_start();
