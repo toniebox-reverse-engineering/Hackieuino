@@ -57,7 +57,9 @@
     #define SAVE_PLAYPOS_WHEN_RFID_CHANGE // When playback is active and mode audiobook was selected, last play-position is saved automatically for old playlist when new RFID-tag is applied
 
     //Board dependend cfg
-    #define WAKEUP_BUTTON 7
+    //#define WAKEUP_BUTTON 7 //Charger + Ears
+    //#define WAKEUP_BUTTON 21 //Ear left small
+    #define WAKEUP_BUTTON 20 //Ear right big
 
     // I2S (DAC)
     #define I2S_DOUT                        10          // Digital out (I2S)
