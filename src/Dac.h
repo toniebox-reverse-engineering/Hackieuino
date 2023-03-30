@@ -7,3 +7,4 @@
 
 void Dac_Init(void);
 void Dac_Cyclic(void);
+void Dac_Exit(void);
