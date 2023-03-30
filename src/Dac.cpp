@@ -30,3 +30,8 @@ void Dac_Init(void) {
 void Dac_Cyclic(void) {
     //
 }
+void Dac_Exit(void) {
+    #ifdef DAC_TLV320DAC3100_ENABLE
+        dac.powerDown();
+    #endif
+}

@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "System.h"
 #include "AudioPlayer.h"
+#include "Dac.h"
 #include "Rfid.h"
 #include "Led.h"
 #include "Log.h"
@@ -204,6 +205,7 @@ void System_DeepSleepManager(void) {
 		#ifdef GPIO_HP_EN
 			Port_Write(GPIO_HP_EN, false, false);
 		#endif
+		Dac_Exit();
 
 		Mqtt_Exit();
 		Led_Exit();
