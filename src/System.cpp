@@ -209,7 +209,6 @@ void System_DeepSleepManager(void) {
 		Dac_Exit();
 
 		Mqtt_Exit();
-		Led_Exit();
 
 		#ifdef USE_LAST_VOLUME_AFTER_REBOOT
 			gPrefsSettings.putUInt("previousVolume", AudioPlayer_GetCurrentVolume());
@@ -217,15 +216,16 @@ void System_DeepSleepManager(void) {
 		SdCard_Exit();
 
 		Serial.flush();
-		// switch off power
-		Power_PeripheralOff();
-		delay(200);
 		#if defined (RFID_READER_TYPE_TRF7962A) || defined (RFID_READER_TYPE_MFRC522_SPI) || defined (RFID_READER_TYPE_MFRC522_I2C) || defined(RFID_READER_TYPE_PN5180)
 			Rfid_Exit();
 		#endif
 		#ifdef PORT_EXPANDER_ENABLE
 			Port_Exit();
 		#endif
+		// switch off power
+		Power_PeripheralOff();
+		Led_Exit();
+		delay(200);
 		Log_Println((char *) F("deep-sleep, good night......."), LOGLEVEL_NOTICE);
 		esp_deep_sleep_start();
 	}
