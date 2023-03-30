@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "System.h"
 #include "AudioPlayer.h"
+#include "Button.h"
 #include "Dac.h"
 #include "Rfid.h"
 #include "Led.h"
@@ -225,6 +226,8 @@ void System_DeepSleepManager(void) {
 		Power_PeripheralOff();
 		Led_Exit();
 		delay(200);
+
+		Button_Init_Wakeup();
 		Log_Println("deep-sleep, good night.......", LOGLEVEL_NOTICE);
 		esp_deep_sleep_start();
 	}

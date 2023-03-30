@@ -57,12 +57,6 @@ static void IRAM_ATTR onTimer();
 static void Button_DoButtonActions(void);
 
 void Button_Init() {
-	#if (WAKEUP_BUTTON >= 0 && WAKEUP_BUTTON <= MAX_GPIO)
-		if (ESP_ERR_INVALID_ARG == esp_sleep_enable_ext0_wakeup((gpio_num_t)WAKEUP_BUTTON, 0)) {
-			Log_Printf(LOGLEVEL_ERROR, wrongWakeUpGpio, WAKEUP_BUTTON);
-		}
-	#endif
-
 	#ifdef NEOPIXEL_ENABLE // Try to find button that is used for shutdown via longpress-action (only necessary for Neopixel)
 		#if defined(BUTTON_0_ENABLE) || defined(EXPANDER_0_ENABLE)
 			#if (BUTTON_0_LONG == CMD_SLEEPMODE)
@@ -140,6 +134,14 @@ void Button_Init() {
 	timerAttachInterrupt(Button_Timer, &onTimer, true);
 	timerAlarmWrite(Button_Timer, 10000, true); // 100 Hz
 	timerAlarmEnable(Button_Timer);
+}
+
+void Button_Init_Wakeup() {
+	#if (WAKEUP_BUTTON >= 0 && WAKEUP_BUTTON <= MAX_GPIO)
+		if (ESP_ERR_INVALID_ARG == esp_sleep_enable_ext0_wakeup((gpio_num_t)WAKEUP_BUTTON, 0)) {
+			Log_Printf(LOGLEVEL_ERROR, wrongWakeUpGpio, WAKEUP_BUTTON);
+		}
+	#endif
 }
 
 // If timer-semaphore is set, read buttons (unless controls are locked)

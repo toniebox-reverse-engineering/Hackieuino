@@ -14,4 +14,5 @@ extern uint8_t gShutdownButton;
 extern bool gButtonInitComplete;
 
 void Button_Init(void);
+void Button_Init_Wakeup(void);
 void Button_Cyclic(void);
