@@ -27,7 +27,9 @@
 				Battery_LogStatus();
 
 				Log_Println(batteryCriticalMsg, LOGLEVEL_NOTICE);
-
+				System_RequestSleep();
+				/* 
+				// Why not just got into sleep?
 				// Power down and enter deepsleep
 				Power_PeripheralOff();
 				delay(200);
@@ -36,6 +38,7 @@
 				#endif
 				delay(1000);
 				esp_deep_sleep_start();
+				*/
 			}
 		#endif
 
