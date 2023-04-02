@@ -16,3 +16,4 @@ src/settings-custom-override.h
 node_modules/
 lib/RvX-TRF7962A
 lib/RvX-LIS3DH
+lib/ESP32-audioI2S
