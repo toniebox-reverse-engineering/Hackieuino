@@ -137,7 +137,7 @@ bool fileValid(const char *_fileItem) {
 	const char ch = '/';
 	char *subst;
 	subst = strrchr(_fileItem, ch); // Don't use files that start with .
-
+	
 	return (!startsWith(subst, (char *) "/.")) && (
 			endsWith(_fileItem, ".mp3") || endsWith(_fileItem, ".MP3") ||
 			endsWith(_fileItem, ".aac") || endsWith(_fileItem, ".AAC") ||
@@ -145,7 +145,8 @@ bool fileValid(const char *_fileItem) {
 			endsWith(_fileItem, ".m4a") || endsWith(_fileItem, ".M4A") ||
 			endsWith(_fileItem, ".wav") || endsWith(_fileItem, ".WAV") ||
 			endsWith(_fileItem, ".flac") || endsWith(_fileItem, ".FLAC") ||
-			endsWith(_fileItem, ".asx") || endsWith(_fileItem, ".ASX"));
+			endsWith(_fileItem, ".asx") || endsWith(_fileItem, ".ASX") ||
+			endsWith(_fileItem, ".opus") || endsWith(_fileItem, ".OPUS"));
 }
 
 
