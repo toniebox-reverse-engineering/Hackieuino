@@ -11,6 +11,7 @@
 RvX_LIS3DH_TB lis = RvX_LIS3DH_TB();
 Button _earSmall = Button(21, 25, false, true);
 Button _earBig = Button(20, 25, false, true);
+Button _charger = Button(8, 25, false, false);
 
 enum class PressedTime { NOT, SHORT, LONG, VERY_LONG };
 enum class EarButton { NONE, SMALL, BIG, BOTH };
@@ -25,14 +26,17 @@ PressedTime _earBothPressedTime = PressedTime::NOT;
 
 void TbControl_Init_LIS3DH(void);
 void TbControl_Init_Buttons(void);
+void TbControl_Init_Charger(void);
 void TbControl_Cyclic_LIS3DH(void);
 void TbControl_Cyclic_Buttons(void);
+void TbControl_Cyclic_Charger(void);
 void TbControl_Ears_WaitForRelease(void);
 void handleEarEvent(EarButton earId, PressedType pressType, PressedTime pressLength);
 
 void TbControl_Init(void) {
     TbControl_Init_LIS3DH();
     TbControl_Init_Buttons();
+    TbControl_Init_Charger();
 }
 void TbControl_Init_LIS3DH(void) {
     const int i2c_sda = 5;
@@ -47,10 +51,14 @@ void TbControl_Init_Buttons(void) {
     _earSmall.begin();
     _earBig.begin();
 }
+void TbControl_Init_Charger(void) {
+    _charger.begin();
+}
 
 void TbControl_Cyclic(void) {
     TbControl_Cyclic_LIS3DH();
     TbControl_Cyclic_Buttons();
+    TbControl_Cyclic_Charger();
 }
 void TbControl_Cyclic_LIS3DH(void) {
     lis.read();
@@ -138,6 +146,15 @@ void handleEarEvent(EarButton earId, PressedType pressType, PressedTime pressLen
         }
     }
 }
+void TbControl_Cyclic_Charger(void) {
+    _charger.read();
+    if (_charger.wasPressed()) {
+        Led_Indicate(LedIndicatorType::Ok);
+    } else if (_charger.wasReleased()) {
+        Led_Indicate(LedIndicatorType::Error);
+    }
+}
+
 void TbControl_Exit(void) {
 
 }
