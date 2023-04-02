@@ -149,15 +149,16 @@
         Please have a look at values.h to look up actions available (>=100 can be used)
         If you don't want to assign an action or you don't use a given button: CMD_NOTHING has to be set
     */
-    #define NEXT_BUTTON                     20          // Button 0: GPIO to detect next
-    #define PREVIOUS_BUTTON                 21          // Button 1: GPIO to detect previous (Important: as of 19.11.2020 changed from 33 to 2; make sure to change in SD-MMC-mode)
+    #define BUTTON_INPUT                    INPUT
+    #define NEXT_BUTTON                     99          // Button 0: GPIO to detect next
+    #define PREVIOUS_BUTTON                 99          // Button 1: GPIO to detect previous (Important: as of 19.11.2020 changed from 33 to 2; make sure to change in SD-MMC-mode)
     #define PAUSEPLAY_BUTTON                99          // Button 2: GPIO to detect pause/play
     #define ROTARYENCODER_BUTTON            99          // (set to 99 to disable; 0->39 for GPIO; 100->115 for port-expander)
     #define BUTTON_4                        99          // Button 4: unnamed optional button
     #define BUTTON_5                        99          // Button 5: unnamed optional button
     // *****BUTTON*****        *****ACTION*****
-    #define BUTTON_0_SHORT    CMD_VOLUMEDOWN
-    #define BUTTON_1_SHORT    CMD_VOLUMEUP
+    #define BUTTON_0_SHORT    CMD_NOTHING
+    #define BUTTON_1_SHORT    CMD_NOTHING
     #define BUTTON_2_SHORT    CMD_NOTHING
     #define BUTTON_3_SHORT    CMD_NOTHING
     #define BUTTON_4_SHORT    CMD_NOTHING
