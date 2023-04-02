@@ -11,7 +11,7 @@ extern uint8_t batteryCheckInterval;
 #endif
 
 void Battery_Init(void);
-void Battery_Cyclic(void);
+void Battery_Cyclic(bool forceRead = false);
 
 float Battery_EstimateLevel(void);
 float Battery_GetVoltage(void);
