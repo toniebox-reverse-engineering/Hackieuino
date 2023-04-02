@@ -2,6 +2,7 @@
 #include "settings.h"
 
 #include "TbControl.h"
+#include "Battery.h"
 #include "Led.h"
 #include "Cmd.h"
 #include "Log.h"
@@ -11,7 +12,7 @@
 RvX_LIS3DH_TB lis = RvX_LIS3DH_TB();
 Button _earSmall = Button(21, 25, false, true);
 Button _earBig = Button(20, 25, false, true);
-Button _charger = Button(8, 25, false, false);
+Button _charger = Button(8, 150, false, false);
 
 enum class PressedTime { NOT, SHORT, LONG, VERY_LONG };
 enum class EarButton { NONE, SMALL, BIG, BOTH };
@@ -53,6 +54,7 @@ void TbControl_Init_Buttons(void) {
 }
 void TbControl_Init_Charger(void) {
     _charger.begin();
+    _charger.read(); //Prevent indicating status after boot.
 }
 
 void TbControl_Cyclic(void) {
@@ -150,8 +152,12 @@ void TbControl_Cyclic_Charger(void) {
     _charger.read();
     if (_charger.wasPressed()) {
         Led_Indicate(LedIndicatorType::Ok);
+        Log_Println((char *) F("Charger connected..."), LOGLEVEL_INFO);
+        Battery_Cyclic(true);
     } else if (_charger.wasReleased()) {
         Led_Indicate(LedIndicatorType::Error);
+        Log_Println((char *) F("Charger disconnected..."), LOGLEVEL_INFO);
+        Battery_Cyclic(true);
     }
 }
 

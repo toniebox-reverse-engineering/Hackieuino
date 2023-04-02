@@ -228,6 +228,8 @@ void setup() {
 	#ifdef CONTROLS_LOCKED_BY_DEFAULT
 		System_SetLockControls(true);
 	#endif
+
+	Battery_Cyclic(true);
 }
 
 void loop() {
