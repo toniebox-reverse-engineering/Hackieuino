@@ -22,6 +22,7 @@
 #include "RotaryEncoder.h"
 #include "SdCard.h"
 #include "System.h"
+#include "TbControl.h"
 #include "Web.h"
 #include "Wlan.h"
 #include "revision.h"
@@ -212,7 +213,7 @@ void setup() {
 	}
 
 	Dac_Init();
-
+	TbControl_Init();
 	IrReceiver_Init();
 	System_UpdateActivityTimer(); // initial set after boot
 	Led_Indicate(LedIndicatorType::BootComplete);
@@ -259,6 +260,7 @@ void loop() {
 	#endif
 
 	Dac_Cyclic();
+	TbControl_Cyclic();
 	IrReceiver_Cyclic();
 	vTaskDelay(portTICK_RATE_MS * 5u);
 
