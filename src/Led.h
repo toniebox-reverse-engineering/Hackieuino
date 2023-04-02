@@ -55,27 +55,6 @@ struct AnimationReturnType {
 	AnimationReturnType(bool active, int32_t delay) :animationActive(active), animationDelay(delay) {}
 };
 
-enum class LedPlaylistProgressStates
-{
-	FillBar = 0,
-	Wait,
-	EmptyBar,
-	EmptyBarToTarget,
-	Done
-};
-
-struct AnimationReturnType {
-    bool animationActive;
-    int32_t animationDelay;
-
-	void clear(){
-		animationActive = false;
-		animationDelay = 0;
-	}
-	AnimationReturnType() :animationActive(false), animationDelay(0) {}
-	AnimationReturnType(bool active, int32_t delay) :animationActive(active), animationDelay(delay) {}
-};
-
 void LedLib_Show(void);
 void LedLib_Clear(bool writeData = false);
 void LedLib_SetBrightness(uint8_t brightness);

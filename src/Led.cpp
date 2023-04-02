@@ -444,7 +444,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 	}
 #endif
 
-#ifdef NEOPIXEL_ENABLE
+#if defined(RGB_LED_ENABLE) || defined(NEOPIXEL_ENABLE)
 	// ---------------------------------------------------------------------
 	// ---------------        ANIMATION-METHODS        ---------------------
 	// ---------------------------------------------------------------------
@@ -598,48 +598,13 @@ void Led_SetButtonLedsEnabled(boolean value) {
 		if (startNewAnimation) {
 			animationIndex = 0;
 		}
-
-					// --------------------------------------------------
-					// Animation of Volume
-					// --------------------------------------------------
-					case LedAnimationType::Volume: {
-						/*
-						* - Single-LED: led indicates loudness between green (low) => red (high)
-						* - Multiple-LEDs: number of LEDs indicate loudness; gradient is shown between
-						*   green (low) => red (high)
-						*/
-						animationActive = true;
-
-						// wait for further volume changes within next 20ms for 50 cycles = 1s
-						const uint32_t ledValue =  map(AudioPlayer_GetCurrentVolume(), 0,
-										AudioPlayer_GetMaxVolume(), 0,
-										NUM_LEDS * DIMMABLE_STATES);
-						const uint8_t fullLeds = ledValue / DIMMABLE_STATES;
-						const uint8_t lastLed = ledValue % DIMMABLE_STATES;
-
-						LedLib_Clear();
-
-						if (NUM_LEDS == 1) {
-							const uint8_t hue = 85 - (90 *
-								((double)AudioPlayer_GetCurrentVolume() /
-								(double)AudioPlayer_GetMaxVolumeSpeaker()));
-							leds[0].setHue(hue);
-						} else {
-							/*
-							* (Inverse) color-gradient from green (85) back to (still)
-							* red (250) using unsigned-cast.
-							*/
-							for (int led = 0; led < fullLeds; led++) {
-								const uint8_t hue = (-86.0f) / (NUM_LEDS-1) * led + 85.0f;
-								leds[Led_Address(led)].setHue(hue);
-							}
-							if (lastLed > 0) {
-								const uint8_t hue = (-86.0f) / (NUM_LEDS-1) * fullLeds + 85.0f;
-								leds[Led_Address(fullLeds)].setHue(hue);
-								leds[Led_Address(fullLeds)] = Led_DimColor(leds[Led_Address(fullLeds)], lastLed);
-							}
-						}
-						LedLib_Show();
+		if (NUM_LEDS == 1) {
+			LedLib_Clear();
+			if (singleLedStatus) {
+				leds[0] = CRGB::Green;
+			}
+			LedLib_Show();
+			singleLedStatus = !singleLedStatus;
 
 			if (animationIndex < 5) {
 				animationIndex++;
@@ -766,12 +731,12 @@ void Led_SetButtonLedsEnabled(boolean value) {
 			animationActive = true;
 
 			if (animationIndex < (NUM_LEDS)) {
-								#if NUM_LEDS > 1
+				#if NUM_LEDS > 1
 					leds[Led_Address(NUM_LEDS - 1 - animationIndex)] = CRGB::Black;
-								#else
+				#else
 					leds[0] = CRGB::Black;								
-								#endif
-								LedLib_Show();
+				#endif
+				LedLib_Show();
 				animationDelay = 30;
 				animationIndex ++;
 			} else {
@@ -911,22 +876,22 @@ void Led_SetButtonLedsEnabled(boolean value) {
 					if (System_AreControlsLocked()) {
 						leds[Led_Address(led)] = CRGB::Red;
 					} else if (!gPlayProperties.pausePlay) { // Hue-rainbow
-										#if NUM_LEDS > 1
+						#if NUM_LEDS > 1
 							leds[Led_Address(led)].setHue((uint8_t)(((float)PROGRESS_HUE_END - (float)PROGRESS_HUE_START) / (NUM_LEDS-1) * led + PROGRESS_HUE_START));
-										#else
-											leds[Led_Address(led)].setHue((uint8_t)(((float)PROGRESS_HUE_END - (float)PROGRESS_HUE_START) / (NUM_LEDS) * led + PROGRESS_HUE_START));
-										#endif
+						#else
+							leds[Led_Address(led)].setHue((uint8_t)(((float)PROGRESS_HUE_END - (float)PROGRESS_HUE_START) / (NUM_LEDS) * led + PROGRESS_HUE_START));
+						#endif
 					}
 				}
 				if (lastLed > 0) {
 					if (System_AreControlsLocked()) {
 						leds[Led_Address(fullLeds)] = CRGB::Red;
 					} else {
-										#if NUM_LEDS > 1
+						#if NUM_LEDS > 1
 							leds[Led_Address(fullLeds)].setHue((uint8_t)(((float)PROGRESS_HUE_END - (float)PROGRESS_HUE_START) / (NUM_LEDS-1) * fullLeds + PROGRESS_HUE_START));
-										#else
-											leds[Led_Address(fullLeds)].setHue((uint8_t)(((float)PROGRESS_HUE_END - (float)PROGRESS_HUE_START) / (NUM_LEDS) * fullLeds + PROGRESS_HUE_START));
-										#endif
+						#else
+							leds[Led_Address(fullLeds)].setHue((uint8_t)(((float)PROGRESS_HUE_END - (float)PROGRESS_HUE_START) / (NUM_LEDS) * fullLeds + PROGRESS_HUE_START));
+						#endif
 					}
 					leds[Led_Address(fullLeds)] = Led_DimColor(leds[Led_Address(fullLeds)], lastLed);
 				}
@@ -970,11 +935,19 @@ void Led_SetButtonLedsEnabled(boolean value) {
 			* red (250) using unsigned-cast.
 			*/
 			for (int led = 0; led < fullLeds; led++) {
-				const uint8_t hue = (-86.0f) / (NUM_LEDS-1) * led + 85.0f;
+				#if NUM_LEDS > 1
+					const uint8_t hue = (-86.0f) / (NUM_LEDS-1) * led + 85.0f;
+				#else
+					const uint8_t hue = (-86.0f) / (NUM_LEDS) * led + 85.0f;
+				#endif
 				leds[Led_Address(led)].setHue(hue);
 			}
 			if (lastLed > 0) {
-				const uint8_t hue = (-86.0f) / (NUM_LEDS-1) * fullLeds + 85.0f;
+				#if NUM_LEDS > 1
+					const uint8_t hue = (-86.0f) / (NUM_LEDS-1) * fullLeds + 85.0f;
+				#else
+					const uint8_t hue = (-86.0f) / (NUM_LEDS) * fullLeds + 85.0f;
+				#endif
 				leds[Led_Address(fullLeds)].setHue(hue);
 				leds[Led_Address(fullLeds)] = Led_DimColor(leds[Led_Address(fullLeds)], lastLed);
 			}
