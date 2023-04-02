@@ -14,7 +14,8 @@
 
 	extern unsigned long Rfid_LastRfidCheckTimestamp;
 	static void Rfid_Task(void *parameter);
-
+	TaskHandle_t rfidTaskHandle;
+	
 	static RvX_TRF7962A rfid = RvX_TRF7962A();
 
 	void Rfid_Init(void) {
@@ -27,7 +28,7 @@
 			2048,                   /* Stack size in words */
 			NULL,                   /* Task input parameter */
 			2 | portPRIVILEGE_BIT,  /* Priority of the task */
-			NULL,                   /* Task handle. */
+			&rfidTaskHandle,        /* Task handle. */
 			1                       /* Core where the task should run */
 		);
 	}

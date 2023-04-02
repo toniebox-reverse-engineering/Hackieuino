@@ -113,6 +113,10 @@ void Web_Init(void) {
 		request->send(response);
 	});
 
+	wServer.onNotFound([](AsyncWebServerRequest *request){
+		request->redirect("/");
+	});
+
 	WWWData::registerRoutes(serveProgmemFiles);
 
 	wServer.on("/init", HTTP_POST, [](AsyncWebServerRequest *request) {
@@ -578,7 +582,7 @@ bool processJsonRequest(char *_serialJson) {
 	} else if (doc.containsKey("rfidAssign")) {
 		const char *_rfidIdAssinId = object["rfidAssign"]["rfidIdMusic"];
 		char _fileOrUrlAscii[MAX_FILEPATH_LENTGH];
-		convertUtf8ToAscii(object["rfidAssign"]["fileOrUrl"], _fileOrUrlAscii);
+		convertFilenameToAscii(object["rfidAssign"]["fileOrUrl"], _fileOrUrlAscii);
 		uint8_t _playMode = object["rfidAssign"]["playMode"];
 		char rfidString[275];
 		snprintf(rfidString, sizeof(rfidString) / sizeof(rfidString[0]), "%s%s%s0%s%u%s0", stringDelimiter, _fileOrUrlAscii, stringDelimiter, stringDelimiter, _playMode, stringDelimiter);
@@ -756,7 +760,7 @@ void explorerHandleFileUpload(AsyncWebServerRequest *request, String filename, s
 			utf8FilePath = "/" + filename;
 		}
 
-		convertUtf8ToAscii(utf8FilePath, filePath);
+		convertFilenameToAscii(utf8FilePath, filePath);
 
 		snprintf(Log_Buffer, Log_BufferLength, "%s: %s", (char *)FPSTR (writingFile), utf8FilePath.c_str());
 		Log_Println(Log_Buffer, LOGLEVEL_INFO);
@@ -798,9 +802,6 @@ void explorerHandleFileUpload(AsyncWebServerRequest *request, String filename, s
 		// watit until the storage task is sending the signal to finish
 		uint8_t signal;
 		xQueueReceive(explorerFileUploadStatusQueue, &signal, portMAX_DELAY);
-
-		// delete task
-		vTaskDelete(fileStorageTaskHandle);
 	}
 }
 
@@ -836,26 +837,32 @@ void explorerHandleFileStorageTask(void *parameter) {
 	BaseType_t uploadFileNotification;
 	uint32_t uploadFileNotificationValue;
 	uploadFile = gFSystem.open((char *)parameter, "w");
-	size_t maxItems = xRingbufferGetMaxItemSize(explorerFileUploadRingBuffer);
+
+	// pause some tasks to get more free CPU time for the upload
+	#ifdef NEOPIXEL_ENABLE
+		vTaskSuspend(Led_TaskHandle);	
+	#endif
+	vTaskSuspend(AudioTaskHandle);	
+	vTaskSuspend(rfidTaskHandle);
+
 	for (;;) {
-		// check buffer is filled with enough data
-		size_t itemsFree = xRingbufferGetCurFreeSize(explorerFileUploadRingBuffer);
-		item_size = maxItems - itemsFree;
-		if (item_size < (maxItems / 2)) {
+		
+		item = (uint8_t *)xRingbufferReceive(explorerFileUploadRingBuffer, &item_size, portTICK_PERIOD_MS * 1u);
+
+		if (item != NULL) {
+			chunkCount++;
+			if (!uploadFile.write(item, item_size)) {
+				bytesNok += item_size;
+				feedTheDog();
+			} else {
+				bytesOk += item_size;
+				vRingbufferReturnItem(explorerFileUploadRingBuffer, (void *)item);
+			}
+			lastUpdateTimestamp = millis();
+		} else {
 			// not enough data in the buffer, check if all data arrived for the file
 			uploadFileNotification = xTaskNotifyWait(0, 0, &uploadFileNotificationValue, 0);
 			if (uploadFileNotification == pdPASS) {
-				item = (uint8_t *)xRingbufferReceive(explorerFileUploadRingBuffer, &item_size, portTICK_PERIOD_MS * 100);
-				if (item != NULL) {
-					chunkCount++;
-					if (!uploadFile.write(item, item_size)) {
-						bytesNok += item_size;
-					} else {
-						bytesOk += item_size;
-					}
-					vRingbufferReturnItem(explorerFileUploadRingBuffer, (void *)item);
-					vTaskDelay(portTICK_PERIOD_MS * 20);
-				}
 				uploadFile.close();
 				snprintf(Log_Buffer, Log_BufferLength, "%s: %s => %zu bytes in %lu ms (%lu kiB/s)", (char *)FPSTR (fileWritten), (char *)parameter, bytesNok+bytesOk, (millis() - transferStartTimestamp), (bytesNok+bytesOk)/(millis() - transferStartTimestamp));
 				Log_Println(Log_Buffer, LOGLEVEL_INFO);
@@ -868,31 +875,36 @@ void explorerHandleFileStorageTask(void *parameter) {
 			if (lastUpdateTimestamp + maxUploadDelay * 1000 < millis()) {
 				snprintf(Log_Buffer, Log_BufferLength, (char *) FPSTR(webTxCanceled));
 				Log_Println(Log_Buffer, LOGLEVEL_ERROR);
+				// resume the paused tasks
+				#ifdef NEOPIXEL_ENABLE
+					vTaskResume(Led_TaskHandle);	
+				#endif
+				vTaskResume(AudioTaskHandle);	
+				vTaskResume(rfidTaskHandle);	
+				// just delete task without signaling (abort)
 				vTaskDelete(NULL);
 				return;
 			}
-			vTaskDelay(portTICK_PERIOD_MS * 5);
-			continue;
+			
 		}
-
-		item = (uint8_t *)xRingbufferReceive(explorerFileUploadRingBuffer, &item_size, portTICK_PERIOD_MS * 100);
-		if (item != NULL) {
-			chunkCount++;
-			if (!uploadFile.write(item, item_size)) {
-				bytesNok += item_size;
-				feedTheDog();
-			} else {
-				bytesOk += item_size;
-			}
-			vRingbufferReturnItem(explorerFileUploadRingBuffer, (void *)item);
-			feedTheDog();
-			lastUpdateTimestamp = millis();
-		}
+		// delay a bit to give the webtask some time fill the ringbuffer
+		#if ESP_ARDUINO_VERSION_MAJOR >= 2
+		vTaskDelay(1u); 
+		#else
+		vTaskDelay(5u);
+		#endif
 	}
+	// resume the paused tasks
+	#ifdef NEOPIXEL_ENABLE
+		vTaskResume(Led_TaskHandle);	
+	#endif
+	vTaskResume(AudioTaskHandle);	
+	vTaskResume(rfidTaskHandle);	
 	// send signal to upload function to terminate
 	xQueueSend(explorerFileUploadStatusQueue, &value, 0);
 	vTaskDelete(NULL);
 }
+
 
 // Sends a list of the content of a directory as JSON file
 // requires a GET parameter path for the directory
@@ -912,7 +924,7 @@ void explorerHandleListRequest(AsyncWebServerRequest *request) {
 	File root;
 	if (request->hasParam("path")) {
 		param = request->getParam("path");
-		convertUtf8ToAscii(param->value(), filePath);
+		convertFilenameToAscii(param->value(), filePath);
 		root = gFSystem.open(filePath);
 	} else {
 		root = gFSystem.open("/");
@@ -1030,7 +1042,7 @@ void explorerHandleDownloadRequest(AsyncWebServerRequest *request) {
 	}
 	// check file exists on SD card
 	param = request->getParam("path");
-	convertUtf8ToAscii(param->value(), filePath);
+	convertFilenameToAscii(param->value(), filePath);
 	if (!gFSystem.exists(filePath)) {
 		snprintf(Log_Buffer, Log_BufferLength, "DOWNLOAD:  File not found on SD card: %s", param->value().c_str());
 		Log_Println(Log_Buffer, LOGLEVEL_ERROR);
@@ -1079,7 +1091,7 @@ void explorerHandleDeleteRequest(AsyncWebServerRequest *request) {
 	char filePath[MAX_FILEPATH_LENTGH];
 	if (request->hasParam("path")) {
 		param = request->getParam("path");
-		convertUtf8ToAscii(param->value(), filePath);
+		convertFilenameToAscii(param->value(), filePath);
 		if (gFSystem.exists(filePath)) {
 			file = gFSystem.open(filePath);
 			if (file.isDirectory()) {
@@ -1118,7 +1130,7 @@ void explorerHandleCreateRequest(AsyncWebServerRequest *request) {
 	char filePath[MAX_FILEPATH_LENTGH];
 	if (request->hasParam("path")) {
 		param = request->getParam("path");
-		convertUtf8ToAscii(param->value(), filePath);
+		convertFilenameToAscii(param->value(), filePath);
 		if (gFSystem.mkdir(filePath)) {
 			snprintf(Log_Buffer, Log_BufferLength, "CREATE:  %s created", param->value().c_str());
 			Log_Println(Log_Buffer, LOGLEVEL_INFO);
@@ -1143,13 +1155,19 @@ void explorerHandleRenameRequest(AsyncWebServerRequest *request) {
 	if (request->hasParam("srcpath") && request->hasParam("dstpath")) {
 		srcPath = request->getParam("srcpath");
 		dstPath = request->getParam("dstpath");
-		convertUtf8ToAscii(srcPath->value(), srcFullFilePath);
-		convertUtf8ToAscii(dstPath->value(), dstFullFilePath);
+		convertFilenameToAscii(srcPath->value(), srcFullFilePath);
+		convertFilenameToAscii(dstPath->value(), dstFullFilePath);
 		if (gFSystem.exists(srcFullFilePath)) {
 			if (gFSystem.rename(srcFullFilePath, dstFullFilePath)) {
 				snprintf(Log_Buffer, Log_BufferLength, "RENAME:  %s renamed to %s", srcPath->value().c_str(), dstPath->value().c_str());
 				Log_Println(Log_Buffer, LOGLEVEL_INFO);
 				Web_DeleteCachefile(dstFullFilePath);
+				// Also delete cache file inside the renamed folder
+				char cacheFile[MAX_FILEPATH_LENTGH];
+				snprintf(cacheFile, MAX_FILEPATH_LENTGH, "%s/%s", dstFullFilePath, playlistCacheFile);
+				if (gFSystem.exists(cacheFile)) {
+					gFSystem.remove(cacheFile);
+				}
 			} else {
 				snprintf(Log_Buffer, Log_BufferLength, "RENAME:  Cannot rename %s", srcPath->value().c_str());
 				Log_Println(Log_Buffer, LOGLEVEL_ERROR);
@@ -1175,7 +1193,7 @@ void explorerHandleAudioRequest(AsyncWebServerRequest *request) {
 	char filePath[MAX_FILEPATH_LENTGH];
 	if (request->hasParam("path") && request->hasParam("playmode")) {
 		param = request->getParam("path");
-		convertUtf8ToAscii(param->value(), filePath);
+		convertFilenameToAscii(param->value(), filePath);
 		param = request->getParam("playmode");
 		playModeString = param->value();
 
