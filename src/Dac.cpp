@@ -21,8 +21,6 @@ void Dac_Init(void) {
         Wire.begin();
         if (!dac.begin(0x18)) {
 			Log_Println((char *) F("DAC: NOT FOUND!"), LOGLEVEL_ERROR);
-        } else {
-			Log_Println((char *) F("DAC: FOUND!"), LOGLEVEL_INFO);
         }
         //dac.beep(); //hangs
     #endif
