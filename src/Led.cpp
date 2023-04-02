@@ -263,7 +263,7 @@ void Led_SetButtonLedsEnabled(boolean value) {
 				vTaskDelay(portTICK_RATE_MS * 10);
 				continue;
 			}
-			if (System_IsSleepRequested()) { // If deepsleep is planned, turn off LEDs first in order to avoid LEDs still glowing when ESP32 is in deepsleep
+			if (System_IsSleepRequested() || System_IsRestartRequested()) { // If deepsleep / restart is planned, turn off LEDs first in order to avoid LEDs still glowing when ESP32 is in deepsleep
 				if (!turnedOffLeds) {
 					LedLib_Clear(true);
 					turnedOffLeds = true;
