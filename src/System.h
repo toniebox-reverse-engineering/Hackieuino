@@ -11,6 +11,8 @@ void System_Cyclic(void);
 void System_UpdateActivityTimer(void);
 void System_RequestSleep(void);
 bool System_IsSleepRequested(void);
+void System_RequestRestart(void);
+bool System_IsRestartRequested(void);
 bool System_SetSleepTimer(uint8_t minutes);
 void System_DisableSleepTimer();
 bool System_IsSleepTimerEnabled(void);
